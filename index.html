@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveNow Rentals - Book Your Perfect Ride</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+        #hero-section {
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease-in-out;
+        }
+        .card-enter {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            animation: fadeIn 0.6s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .car-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .btn-search {
+            transition: all 0.3s ease;
+        }
+        .btn-search:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px -10px #1d4ed8;
+        }
+        .loader-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 9999; backdrop-filter: blur(8px);
+        }
+        .loader {
+            border: 8px solid #e5e7eb; border-top: 8px solid #1e40af;
+            border-radius: 50%; width: 70px; height: 70px;
+            animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Loading Animation -->
+    <div id="loader" class="loader-container">
+        <div class="text-center">
+            <div class="loader mx-auto"></div>
+            <p class="mt-4 text-lg font-semibold text-gray-700">Generating Your Dream Fleet...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white/90 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-3xl font-extrabold text-gray-900">
+                <span class="text-blue-600">Drive</span>Now
+            </a>
+            <div class="hidden md:flex items-center space-x-8 font-medium text-gray-600">
+                <a href="#" class="hover:text-blue-600 transition-colors">Home</a>
+                <a href="#cars-section" class="hover:text-blue-600 transition-colors">Cars</a>
+                <a href="#" class="hover:text-blue-600 transition-colors">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="hero-section" class="relative text-white h-[70vh] min-h-[500px] flex items-center justify-center text-center bg-gray-500">
+            <div class="absolute inset-0 bg-black/50"></div>
+            <div class="relative z-10 p-6">
+                <h2 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">Book Your Perfect Ride Anytime</h2>
+                
+                <!-- Search Bar -->
+                <div class="bg-white/20 backdrop-blur-md p-4 rounded-xl max-w-4xl mx-auto">
+                    <form id="search-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                        <input type="text" id="pickup-location" placeholder="Pickup Location" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" id="pickup-date" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="car-type-filter" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="All">All Car Types</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Luxury">Luxury</option>
+                        </select>
+                        <button type="submit" class="btn-search bg-blue-600 text-white font-bold p-3 rounded-lg w-full shadow-lg">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Car Listings Section -->
+        <section id="cars-section" class="container mx-auto px-6 py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold text-gray-900">Today's Available Fleet</h3>
+                <p class="text-gray-500 mt-2">A fresh, AI-generated lineup ready for you.</p>
+            </div>
+            <div id="car-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Car cards will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="container mx-auto px-6 py-10 text-center">
+            <p class="font-semibold">DriveNow Rentals</p>
+            <p class="text-gray-400 text-sm">Contact us: (123) 456-7890 | support@drivenow.rentals</p>
+            <p class="text-gray-500 text-xs mt-4">&copy; 2025 DriveNow Rentals. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const loader = document.getElementById('loader');
+            const heroSection = document.getElementById('hero-section');
+            const carGrid = document.getElementById('car-grid');
+            const searchForm = document.getElementById('search-form');
+            const carTypeFilter = document.getElementById('car-type-filter');
+
+            // --- Configuration ---
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=`; // Empty API key
+            const CAR_COUNT = 6;
+
+            const carDataConfig = {
+                'SUV': { names: ['Trailblazer', 'Pathfinder', 'Ascend', 'Voyager'], prompts: ['Modern SUV', 'Luxury crossover SUV'] },
+                'Sedan': { names: ['Clarity', 'Fusion', 'Sonata', 'Accord'], prompts: ['Sleek modern sedan', 'Family sedan'] },
+                'Electric': { names: ['Volt', 'Leaf', 'Bolt', 'IONIQ'], prompts: ['Futuristic electric car', 'Electric sedan'] },
+                'Hatchback': { names: ['Fit', 'Fiesta', 'Polo', 'Swift'], prompts: ['Compact hatchback car', 'Sporty hatchback'] },
+                'Luxury': { names: ['Phantom', 'Ghost', 'S-Class', 'A8'], prompts: ['Ultra-luxury sedan', 'Executive luxury car'] }
+            };
+            const allCarTypes = Object.keys(carDataConfig);
+
+            // --- Helper Functions ---
+            function getRandomElement(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            }
+
+            function generateCar() {
+                const type = getRandomElement(allCarTypes);
+                const name = getRandomElement(carDataConfig[type].names);
+                const prompt = getRandomElement(carDataConfig[type].prompts);
+                const price = Math.floor(Math.random() * (7000 - 2000 + 1)) + 2000;
+                return { type, name, price, prompt: `Professional studio photo of a ${prompt}, white background, high quality, 8k` };
+            }
+
+            async function fetchImageWithRetry(prompt, retries = 3, delay = 1000) {
+                try {
+                    const payload = { instances: [{ prompt }], parameters: { "sampleCount": 1 } };
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    const result = await response.json();
+                    if (result.predictions && result.predictions[0]?.bytesBase64Encoded) {
+                        return `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    }
+                    throw new Error("Invalid API response");
+                } catch (error) {
+                    console.error(`Fetch error for prompt "${prompt}". Retries left: ${retries - 1}`, error);
+                    if (retries > 1) {
+                        await new Promise(res => setTimeout(res, delay));
+                        return fetchImageWithRetry(prompt, retries - 1, delay * 2);
+                    }
+                    return null;
+                }
+            }
+
+            function renderCarCard(car, imageUrl, index) {
+                const card = document.createElement('div');
+                card.className = 'car-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-all duration-300';
+                card.dataset.type = car.type;
+                
+                const finalImageUrl = imageUrl || `https://placehold.co/600x400/fecaca/991b1b?text=Image+Failed`;
+
+                card.innerHTML = `
+                    <div class="h-64 bg-gray-200">
+                       <img src="${finalImageUrl}" alt="${car.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h4 class="text-2xl font-bold text-gray-900 mb-2">${car.name} <span class="text-sm font-medium text-gray-500">${car.type}</span></h4>
+                        <p class="text-gray-600 mb-6 flex-grow">A fresh arrival, generated just for you. Experience the future of driving.</p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-xl font-bold text-blue-600">₹${car.price.toLocaleString()}/day</p>
+                            <button class="bg-gray-900 text-white font-semibold py-2 px-6 rounded-full hover:bg-gray-700 transition-colors duration-300">Rent Now</button>
+                        </div>
+                    </div>
+                `;
+                // Apply staggered animation
+                card.style.animationDelay = `${index * 100}ms`;
+                card.classList.add('card-enter');
+                return card;
+            }
+
+            function handleSearch(event) {
+                event.preventDefault();
+                const selectedType = carTypeFilter.value;
+                const carCards = document.querySelectorAll('.car-card');
+
+                carCards.forEach(card => {
+                    const cardType = card.dataset.type;
+                    if (selectedType === 'All' || cardType === selectedType) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+            
+            // --- Main Application Logic ---
+            async function initializePage() {
+                loader.style.display = 'flex';
+
+                const heroCarPrompt = "Photorealistic wide shot of a luxury sports car on a scenic coastal road at sunset, 8k, cinematic";
+                const carsToGenerate = Array.from({ length: CAR_COUNT }, generateCar);
+                
+                const allPrompts = [heroCarPrompt, ...carsToGenerate.map(c => c.prompt)];
+                const allImages = await Promise.all(allPrompts.map(p => fetchImageWithRetry(p)));
+                
+                const [heroImageUrl, ...gridImageUrls] = allImages;
+
+                // Populate Hero
+                if (heroImageUrl) {
+                    heroSection.style.backgroundImage = `url('${heroImageUrl}')`;
+                } else {
+                    heroSection.style.backgroundColor = '#374151'; // Fallback color
+                }
+
+                // Populate Grid
+                carGrid.innerHTML = '';
+                carsToGenerate.forEach((car, index) => {
+                    const cardElement = renderCarCard(car, gridImageUrls[index], index);
+                    carGrid.appendChild(cardElement);
+                });
+
+                // Set up search filter
+                searchForm.addEventListener('submit', handleSearch);
+
+                loader.style.display = 'none';
+            }
+
+            initializePage();
+        });
+    </script>
+</body>
+</html>
