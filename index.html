@@ -29,38 +29,42 @@
             transform: scale(1.05);
         }
         /* Modal Styles */
-        .modal-hidden {
-            display: none;
-        }
+        .modal-hidden { display: none; }
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; transition: opacity 0.3s ease-in-out;
         }
         .modal-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            width: 90%;
-            max-width: 450px;
-            transform: scale(0.95);
-            transition: transform 0.3s ease-in-out;
+            background: white; padding: 2rem; border-radius: 1rem;
+            width: 90%; max-width: 450px;
+            transform: scale(0.95); transition: transform 0.3s ease-in-out;
         }
-        .modal-visible .modal-overlay {
+        .modal-visible .modal-overlay { opacity: 1; }
+        .modal-visible .modal-container { transform: scale(1); }
+        
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .notification.show {
             opacity: 1;
+            transform: translateX(0);
         }
-        .modal-visible .modal-container {
-            transform: scale(1);
-        }
+        .notification.success { background-color: #28a745; }
+        .notification.error { background-color: #dc3545; }
+
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0) scale(1); } }
     </style>
 </head>
@@ -77,9 +81,13 @@
                 <a href="#cars-section" class="hover:text-blue-600 transition-colors">Cars</a>
                 <a href="#" class="hover:text-blue-600 transition-colors">Contact</a>
             </div>
-            <div class="flex items-center space-x-2">
+            <div id="auth-buttons" class="flex items-center space-x-2">
                 <button id="signin-btn" class="font-medium text-gray-600 hover:text-blue-600 transition-colors px-4 py-2 rounded-lg">Sign In</button>
                 <button id="signup-btn" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Sign Up</button>
+            </div>
+             <div id="user-profile" class="hidden items-center space-x-3">
+                <span id="user-email" class="font-medium text-gray-700"></span>
+                <button id="logout-btn" class="bg-red-500 text-white font-bold px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm">Logout</button>
             </div>
         </nav>
     </header>
@@ -91,12 +99,10 @@
             <div class="absolute inset-0 bg-black/50"></div>
             <div class="relative z-10 p-6">
                 <h2 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6">Book Your Perfect Ride Anytime</h2>
-                
-                <!-- Search Bar -->
                 <div class="bg-white/20 backdrop-blur-md p-4 rounded-xl max-w-4xl mx-auto">
                     <form id="search-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                         <input type="text" placeholder="Pickup Location" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="date" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="date" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" id="date-input">
                         <select id="car-type-filter" class="w-full p-3 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="All">All Car Types</option>
                             <option value="SUV">SUV</option>
@@ -119,9 +125,7 @@
                 <h3 class="text-4xl font-bold text-gray-900">Today's Available Fleet</h3>
                 <p class="text-gray-500 mt-2">A fresh lineup ready for you.</p>
             </div>
-            <div id="car-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Car cards will be dynamically inserted here -->
-            </div>
+            <div id="car-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </section>
     </main>
 
@@ -139,20 +143,28 @@
         <div class="modal-overlay">
             <div class="modal-container">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 id="modal-title" class="text-2xl font-bold">Sign In</h3>
+                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
                     <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
                 </div>
                 <form id="auth-form">
                     <div class="space-y-4">
-                        <input type="email" placeholder="Email Address" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <input type="password" placeholder="Password" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="email" id="auth-email" placeholder="Email Address" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="password" id="auth-password" placeholder="Password" required class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <input type="password" id="confirm-password" placeholder="Confirm Password" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <button type="submit" id="modal-submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-6 hover:bg-blue-700 transition-colors">Sign In</button>
+                    <button type="submit" id="modal-submit-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mt-6 hover:bg-blue-700 transition-colors"></button>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- User Database in JSON format -->
+    <script id="users-db" type="application/json">
+    [
+        { "email": "user@example.com", "password": "password123" },
+        { "email": "test@drivenow.com", "password": "testpassword" }
+    ]
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -161,7 +173,7 @@
             const carGrid = document.getElementById('car-grid');
             const searchForm = document.getElementById('search-form');
             const carTypeFilter = document.getElementById('car-type-filter');
-            // Modal elements
+            // Auth elements
             const authModal = document.getElementById('auth-modal');
             const signInBtn = document.getElementById('signin-btn');
             const signUpBtn = document.getElementById('signup-btn');
@@ -169,22 +181,45 @@
             const modalTitle = document.getElementById('modal-title');
             const modalSubmitBtn = document.getElementById('modal-submit-btn');
             const confirmPasswordField = document.getElementById('confirm-password');
+            const authForm = document.getElementById('auth-form');
+            const authButtons = document.getElementById('auth-buttons');
+            const userProfile = document.getElementById('user-profile');
+            const userEmailSpan = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
 
-            // --- Car Data Source (No API) ---
+            // --- Car Data Source ---
             const carDatabase = [
-                { type: 'SUV', name: 'Urban Explorer', imageUrl: 'https://placehold.co/600x400/3b82f6/ffffff?text=SUV' },
-                { type: 'Sedan', name: 'City Cruiser', imageUrl: 'https://placehold.co/600x400/16a34a/ffffff?text=Sedan' },
-                { type: 'Electric', name: 'Volt Runner', imageUrl: 'https://placehold.co/600x400/f59e0b/ffffff?text=Electric' },
-                { type: 'Hatchback', name: 'Metro Spirit', imageUrl: 'https://placehold.co/600x400/ef4444/ffffff?text=Hatchback' },
-                { type: 'Luxury', name: 'Prestige Line', imageUrl: 'https://placehold.co/600x400/1f2937/ffffff?text=Luxury' },
-                { type: 'SUV', name: 'Mountain Mover', imageUrl: 'https://placehold.co/600x400/3b82f6/ffffff?text=SUV' },
-                { type: 'Sedan', name: 'Executive Ride', imageUrl: 'https://placehold.co/600x400/16a34a/ffffff?text=Sedan' },
-                { type: 'Electric', name: 'Eco Stream', imageUrl: 'https://placehold.co/600x400/f59e0b/ffffff?text=Electric' },
-                { type: 'Luxury', name: 'Elegance Sedan', imageUrl: 'https://placehold.co/600x400/1f2937/ffffff?text=Luxury' },
-                { type: 'Hatchback', name: 'City Hopper', imageUrl: 'https://placehold.co/600x400/ef4444/ffffff?text=Hatchback' }
+                { type: 'SUV', name: 'Urban Explorer', imageUrl: 'https://images.pexels.com/photos/17052544/pexels-photo-17052544/free-photo-of-a-blue-jeep-wrangler-in-the-desert.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Sedan', name: 'City Cruiser', imageUrl: 'https://images.pexels.com/photos/1402787/pexels-photo-1402787.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Electric', name: 'Volt Runner', imageUrl: 'https://images.pexels.com/photos/3786092/pexels-photo-3786092.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Hatchback', name: 'Metro Spirit', imageUrl: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Luxury', name: 'Prestige Line', imageUrl: 'https://images.pexels.com/photos/3729464/pexels-photo-3729464.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'SUV', name: 'Mountain Mover', imageUrl: 'https://images.pexels.com/photos/3764984/pexels-photo-3764984.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Sedan', name: 'Executive Ride', imageUrl: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Electric', name: 'Eco Stream', imageUrl: 'https://images.pexels.com/photos/10394783/pexels-photo-10394783.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Luxury', name: 'Elegance Sedan', imageUrl: 'https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?auto=compress&cs=tinysrgb&w=800' },
+                { type: 'Hatchback', name: 'City Hopper', imageUrl: 'https://images.pexels.com/photos/241316/pexels-photo-241316.jpeg?auto=compress&cs=tinysrgb&w=800' }
             ];
+            
+            let users = JSON.parse(document.getElementById('users-db').textContent);
+            let currentUser = null;
+            let isSignUpMode = false;
 
             // --- Helper Functions ---
+            function showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 500);
+                }, 3000);
+            }
+
             function getRandomPrice() {
                 return Math.floor(Math.random() * (7000 - 2000 + 1)) + 2000;
             }
@@ -201,20 +236,16 @@
                 const card = document.createElement('div');
                 card.className = 'car-card bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col transition-all duration-300';
                 card.dataset.type = car.type;
-                
                 card.innerHTML = `
-                    <div class="h-64 bg-gray-200">
-                       <img src="${car.imageUrl}" alt="${car.name}" class="w-full h-full object-cover">
-                    </div>
+                    <div class="h-64 bg-gray-200"><img src="${car.imageUrl}" alt="${car.name}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x400/ef4444/ffffff?text=Image+Error';"></div>
                     <div class="p-6 flex flex-col flex-grow">
                         <h4 class="text-2xl font-bold text-gray-900 mb-2">${car.name} <span class="text-sm font-medium text-gray-500">${car.type}</span></h4>
-                        <p class="text-gray-600 mb-6 flex-grow">Top-rated for its class. Perfect for your next trip, available today.</p>
+                        <p class="text-gray-600 mb-6 flex-grow">Top-rated for its class. Perfect for your next trip.</p>
                         <div class="flex justify-between items-center">
                             <p class="text-xl font-bold text-blue-600">₹${getRandomPrice().toLocaleString()}/day</p>
                             <button class="bg-gray-900 text-white font-semibold py-2 px-6 rounded-full hover:bg-gray-700 transition-colors duration-300">Rent Now</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 card.style.animationDelay = `${index * 100}ms`;
                 card.classList.add('card-enter');
                 return card;
@@ -228,8 +259,29 @@
                 });
             }
 
-            // --- Modal Logic ---
+            // --- Auth Logic ---
+            function updateNavUI() {
+                if (currentUser) {
+                    authButtons.classList.add('hidden');
+                    userProfile.classList.remove('hidden');
+                    userProfile.classList.add('flex');
+                    userEmailSpan.textContent = currentUser.email;
+                } else {
+                    authButtons.classList.remove('hidden');
+                    userProfile.classList.add('hidden');
+                    userProfile.classList.remove('flex');
+                }
+            }
+            
+            function handleLogout() {
+                currentUser = null;
+                updateNavUI();
+                showNotification("You have been logged out.");
+            }
+
             function openModal(isSignUp) {
+                isSignUpMode = isSignUp;
+                authForm.reset();
                 authModal.classList.remove('modal-hidden');
                 document.body.classList.add('modal-visible');
                 if (isSignUp) {
@@ -247,20 +299,52 @@
 
             function closeModal() {
                 document.body.classList.remove('modal-visible');
-                setTimeout(() => {
-                    authModal.classList.add('modal-hidden');
-                }, 300); // Wait for animation
+                setTimeout(() => authModal.classList.add('modal-hidden'), 300);
+            }
+
+            function handleAuthSubmit(e) {
+                e.preventDefault();
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+
+                if (isSignUpMode) {
+                    const confirmPassword = confirmPasswordField.value;
+                    if (password !== confirmPassword) {
+                        showNotification("Passwords do not match.", "error");
+                        return;
+                    }
+                    if (users.some(user => user.email === email)) {
+                        showNotification("An account with this email already exists.", "error");
+                        return;
+                    }
+                    users.push({ email, password });
+                    currentUser = { email };
+                    showNotification("Account created successfully!");
+                } else {
+                    const user = users.find(u => u.email === email && u.password === password);
+                    if (user) {
+                        currentUser = user;
+                        showNotification("Sign in successful!");
+                    } else {
+                        showNotification("Invalid email or password.", "error");
+                        return;
+                    }
+                }
+                updateNavUI();
+                closeModal();
             }
 
             // --- Main Application Logic ---
             function initializePage() {
                 // Set hero background
-                heroSection.style.backgroundImage = `url('https://placehold.co/1920x1080/374151/ffffff?text=DriveNow+Rentals')`;
+                heroSection.style.backgroundImage = `url('https://images.pexels.com/photos/3137077/pexels-photo-3137077.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1')`;
+                
+                // Set today's date for date input
+                document.getElementById('date-input').valueAsDate = new Date();
 
-                // Populate car grid with a random selection
+                // Populate car grid
                 carGrid.innerHTML = '';
-                const shuffledCars = shuffleArray([...carDatabase]);
-                shuffledCars.slice(0, 6).forEach((car, index) => {
+                shuffleArray([...carDatabase]).slice(0, 6).forEach((car, index) => {
                     carGrid.appendChild(renderCarCard(car, index));
                 });
 
@@ -268,15 +352,12 @@
                 searchForm.addEventListener('submit', handleSearch);
                 signInBtn.addEventListener('click', () => openModal(false));
                 signUpBtn.addEventListener('click', () => openModal(true));
+                logoutBtn.addEventListener('click', handleLogout);
                 modalCloseBtn.addEventListener('click', closeModal);
                 authModal.querySelector('.modal-overlay').addEventListener('click', (e) => {
                     if (e.target === e.currentTarget) closeModal();
                 });
-                document.getElementById('auth-form').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    console.log('Form submitted!'); // Simulate form submission
-                    closeModal();
-                });
+                authForm.addEventListener('submit', handleAuthSubmit);
             }
 
             initializePage();
